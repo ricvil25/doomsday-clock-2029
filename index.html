@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090909" />
+  <meta name="description" content="A dramatic live countdown to 2029." />
+  <title>Doomsday Clock 2029</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #060606;
+      --panel: rgba(12, 12, 12, .78);
+      --text: #f3f3f3;
+      --muted: #a7a7a7;
+      --red: #ff2626;
+      --red-dark: #790909;
+      --line: rgba(255,255,255,.12);
+    }
+
+    html { background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 50% 10%, rgba(225, 0, 0, .25), transparent 27rem),
+        radial-gradient(circle at 20% 40%, rgba(125, 0, 0, .12), transparent 22rem),
+        linear-gradient(#0b0b0b, #020202);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      background-image:
+        repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.018) 3px 4px);
+      mix-blend-mode: screen;
+    }
+
+    .page {
+      position: relative;
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 36px 0 46px;
+    }
+
+    .eyebrow {
+      text-align: center;
+      color: #d8d8d8;
+      letter-spacing: .3em;
+      font-size: .72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 10px 0 2px;
+      text-align: center;
+      line-height: .93;
+      text-transform: uppercase;
+      font-size: clamp(2.35rem, 9vw, 6.4rem);
+      letter-spacing: -.055em;
+      text-shadow: 0 0 28px rgba(255, 0, 0, .22);
+    }
+
+    h1 span { color: var(--red); }
+
+    .sub {
+      margin: 14px auto 24px;
+      max-width: 720px;
+      text-align: center;
+      color: var(--muted);
+      font-size: clamp(.95rem, 2.5vw, 1.05rem);
+      line-height: 1.55;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr);
+      gap: 24px;
+      align-items: center;
+    }
+
+    .clock-wrap {
+      display: grid;
+      place-items: center;
+      min-width: 0;
+      padding: 10px;
+    }
+
+    .clock {
+      position: relative;
+      width: min(100%, 610px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, #171717 0 10%, transparent 10.5%),
+        radial-gradient(circle at center, rgba(255,0,0,.08), transparent 55%),
+        repeating-conic-gradient(from 0deg, rgba(255,255,255,.22) 0deg 0.65deg, transparent .65deg 6deg),
+        radial-gradient(circle at 48% 42%, #1b1b1b, #090909 67%, #020202 68%);
+      border: clamp(8px, 1.3vw, 14px) solid #1e1e1e;
+      box-shadow:
+        0 0 0 2px #555,
+        0 0 0 5px #111,
+        0 0 45px rgba(255, 0, 0, .32),
+        inset 0 0 70px #000,
+        inset 0 0 35px rgba(255, 0, 0, .18);
+    }
+
+    .clock::after {
+      content: "";
+      position: absolute;
+      inset: 3%;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 45, 45, .28);
+      box-shadow: inset 0 0 16px rgba(255, 0, 0, .12);
+    }
+
+    .roman {
+      position: absolute;
+      z-index: 3;
+      font-family: Georgia, serif;
+      font-weight: 800;
+      color: #d4d4d4;
+      text-shadow: 0 2px 5px #000;
+      font-size: clamp(1.25rem, 5vw, 3rem);
+    }
+    .xii { top: 7%; left: 50%; transform: translateX(-50%); }
+    .iii { right: 8%; top: 50%; transform: translateY(-50%); }
+    .vi { bottom: 6%; left: 50%; transform: translateX(-50%); }
+    .ix { left: 8%; top: 50%; transform: translateY(-50%); }
+
+    .hand {
+      position: absolute;
+      z-index: 4;
+      left: 50%;
+      bottom: 50%;
+      transform-origin: 50% 100%;
+      border-radius: 999px 999px 3px 3px;
+      box-shadow: 0 0 14px rgba(255,0,0,.65);
+    }
+
+    .hour-hand {
+      width: 8px;
+      height: 27%;
+      margin-left: -4px;
+      background: linear-gradient(#fff, #bcbcbc 24%, #4a4a4a 25%, #f0f0f0 100%);
+      transform: rotate(-5deg);
+    }
+
+    .minute-hand {
+      width: 5px;
+      height: 38%;
+      margin-left: -2.5px;
+      background: linear-gradient(#ffefef, #ff2727 28%, #a60000 100%);
+      transform: rotate(-1.4deg);
+    }
+
+    .second-hand {
+      width: 2px;
+      height: 41%;
+      margin-left: -1px;
+      background: #ff2b2b;
+      box-shadow: 0 0 13px rgba(255,0,0,.85);
+    }
+
+    .hub {
+      position: absolute;
+      z-index: 6;
+      width: 5.4%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, #fafafa 0 12%, #2b2b2b 14% 52%, #ff2525 55% 68%, #2b0000 70%);
+      box-shadow: 0 0 18px rgba(255,0,0,.8);
+    }
+
+    .midnight {
+      position: absolute;
+      z-index: 2;
+      top: -1px;
+      left: 50%;
+      width: 5px;
+      height: 8%;
+      transform: translateX(-50%);
+      background: linear-gradient(var(--red), transparent);
+      box-shadow: 0 0 22px rgba(255,0,0,.9);
+    }
+
+    .panel {
+      padding: clamp(20px, 4vw, 32px);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(20,20,20,.9), rgba(5,5,5,.86));
+      box-shadow: inset 0 1px rgba(255,255,255,.04);
+    }
+
+    .label {
+      color: #d1d1d1;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .72rem;
+    }
+
+    .countdown {
+      margin-top: 17px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .unit {
+      min-width: 0;
+      padding: 16px 10px 13px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 15px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .num {
+      display: block;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(2rem, 6vw, 3.35rem);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.045em;
+    }
+
+    .unit small {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: .66rem;
+      letter-spacing: .17em;
+      font-weight: 800;
+    }
+
+    .deadline {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: .87rem;
+      line-height: 1.45;
+    }
+
+    .deadline strong { color: #fff; }
+
+    .progress-shell {
+      margin: 22px 0 18px;
+      height: 9px;
+      border-radius: 99px;
+      overflow: hidden;
+      background: #171717;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .progress {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #5b0808, #ff2424);
+      box-shadow: 0 0 15px rgba(255,0,0,.55);
+      transition: width .5s linear;
+    }
+
+    .percent {
+      margin-top: -8px;
+      color: #bfbfbf;
+      font-size: .8rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 19px;
+    }
+
+    button, a.button {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 13px;
+      min-height: 46px;
+      padding: 0 17px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      font: inherit;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .primary {
+      color: white;
+      background: linear-gradient(180deg, #ff3333, #ba0808);
+      box-shadow: 0 8px 26px rgba(175,0,0,.22);
+    }
+    .secondary {
+      color: white;
+      background: #141414;
+    }
+
+    button:focus-visible, a.button:focus-visible {
+      outline: 3px solid rgba(255, 95, 95, .55);
+      outline-offset: 3px;
+    }
+
+    .status {
+      min-height: 1.4em;
+      margin-top: 12px;
+      color: #c9c9c9;
+      font-size: .8rem;
+    }
+
+    .warning {
+      margin-top: 22px;
+      padding-top: 17px;
+      border-top: 1px solid var(--line);
+      color: #8f8f8f;
+      font-size: .76rem;
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #686868;
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 790px) {
+      .page { padding-top: 26px; }
+      .stage { grid-template-columns: 1fr; gap: 18px; }
+      .clock-wrap { padding: 2px 12px 8px; }
+      .panel { max-width: 610px; width: 100%; margin: 0 auto; }
+    }
+
+    @media (max-width: 390px) {
+      .countdown { gap: 7px; }
+      .unit { padding-left: 5px; padding-right: 5px; }
+      .actions { flex-direction: column; }
+      button, a.button { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="eyebrow">The countdown has begun</div>
+    <h1>Doomsday Clock <span>2029</span></h1>
+    <p class="sub">Every second moves the hands closer to midnight. Share the clock and watch the countdown together.</p>
+
+    <section class="stage">
+      <div class="clock-wrap" aria-label="Doomsday clock approaching midnight">
+        <div class="clock">
+          <div class="midnight"></div>
+          <div class="roman xii">XII</div>
+          <div class="roman iii">III</div>
+          <div class="roman vi">VI</div>
+          <div class="roman ix">IX</div>
+          <div class="hand hour-hand"></div>
+          <div class="hand minute-hand"></div>
+          <div class="hand second-hand" id="secondHand"></div>
+          <div class="hub"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="label">Time remaining</div>
+
+        <div class="countdown" aria-live="polite">
+          <div class="unit"><span class="num" id="days">---</span><small>Days</small></div>
+          <div class="unit"><span class="num" id="hours">--</span><small>Hours</small></div>
+          <div class="unit"><span class="num" id="minutes">--</span><small>Minutes</small></div>
+          <div class="unit"><span class="num" id="seconds">--</span><small>Seconds</small></div>
+        </div>
+
+        <div class="deadline">Counting down to <strong>January 1, 2029 · 12:00 AM</strong> in your local time.</div>
+
+        <div class="progress-shell" aria-hidden="true"><div class="progress" id="progress"></div></div>
+        <div class="percent" id="percentText">Calculating...</div>
+
+        <div class="actions">
+          <button class="primary" type="button" id="shareBtn">Share This Clock</button>
+          <button class="secondary" type="button" id="copyBtn">Copy Link</button>
+        </div>
+        <div class="status" id="status" role="status"></div>
+
+        <div class="warning">This is a fictional countdown webpage for entertainment and sharing. It is not affiliated with the Bulletin of the Atomic Scientists or the official Doomsday Clock.</div>
+      </div>
+    </section>
+
+    <footer>Midnight waits for no one.</footer>
+  </main>
+
+  <script>
+    (() => {
+      const target = new Date(2029, 0, 1, 0, 0, 0, 0);
+      const start = new Date(2026, 0, 1, 0, 0, 0, 0);
+
+      const el = (id) => document.getElementById(id);
+      const daysEl = el("days");
+      const hoursEl = el("hours");
+      const minutesEl = el("minutes");
+      const secondsEl = el("seconds");
+      const secondHand = el("secondHand");
+      const progress = el("progress");
+      const percentText = el("percentText");
+      const shareBtn = el("shareBtn");
+      const copyBtn = el("copyBtn");
+      const status = el("status");
+
+      function pad(n) { return String(n).padStart(2, "0"); }
+
+      function update() {
+        const now = new Date();
+        let diff = target - now;
+
+        if (diff <= 0) {
+          daysEl.textContent = "0";
+          hoursEl.textContent = "00";
+          minutesEl.textContent = "00";
+          secondsEl.textContent = "00";
+          percentText.textContent = "Midnight has arrived.";
+          progress.style.width = "100%";
+          secondHand.style.transform = "rotate(0deg)";
+          return;
+        }
+
+        const totalSeconds = Math.floor(diff / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        daysEl.textContent = days.toLocaleString();
+        hoursEl.textContent = pad(hours);
+        minutesEl.textContent = pad(minutes);
+        secondsEl.textContent = pad(seconds);
+
+        secondHand.style.transform = `rotate(${seconds * 6}deg)`;
+
+        const fullSpan = target - start;
+        const elapsed = Math.max(0, Math.min(fullSpan, now - start));
+        const pct = fullSpan > 0 ? (elapsed / fullSpan) * 100 : 100;
+        progress.style.width = `${pct.toFixed(4)}%`;
+        percentText.textContent = `${pct.toFixed(2)}% of the road from 2026 to 2029 has passed.`;
+      }
+
+      async function copyCurrentLink() {
+        const url = location.href;
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(url);
+            status.textContent = "Link copied.";
+          } else {
+            window.prompt("Copy this link:", url);
+            status.textContent = "Copy the link above.";
+          }
+        } catch {
+          window.prompt("Copy this link:", url);
+        }
+      }
+
+      shareBtn.addEventListener("click", async () => {
+        const shareData = {
+          title: "Doomsday Clock 2029",
+          text: "The countdown to 2029 is running. Watch the Doomsday Clock.",
+          url: location.href
+        };
+
+        if (navigator.share) {
+          try {
+            await navigator.share(shareData);
+            status.textContent = "Shared.";
+          } catch (err) {
+            if (err && err.name !== "AbortError") status.textContent = "Sharing was unavailable.";
+          }
+        } else {
+          copyCurrentLink();
+        }
+      });
+
+      copyBtn.addEventListener("click", copyCurrentLink);
+
+      update();
+      setInterval(update, 250);
+    })();
+  </script>
+</body>
+</html>
